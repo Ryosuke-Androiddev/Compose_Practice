@@ -8,9 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -23,68 +24,50 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.compose_practice.ui.theme.ComposePracticeTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val painter = painterResource(id = R.drawable.jacky)
-            val description = "くまのがっこう"
-            val title = "ジャッキー"
+            val scaffoldState = rememberScaffoldState()
+            var textFieldState by remember{
+                mutableStateOf("")
+            }// MutableState<String> -> String型に変換されるらしい
+            val scope = rememberCoroutineScope()
 
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                scaffoldState = scaffoldState
+            ) {
 
-
-            Box(modifier = Modifier
-                .padding(16.dp)) {
-                ImageCard(painter = painter, contentDescription = description, title = title)
-            }
-
-        }
-    }
-}
-
-
-@Composable
-fun ImageCard(
-    painter: Painter,
-    contentDescription: String,
-    title: String,
-    modifier: Modifier = Modifier
-) {
-
-    Card(
-        modifier = modifier
-            .fillMaxSize(),
-        shape = RoundedCornerShape(15.dp),
-        elevation = 5.dp
-    ) {
-        Box {
-            Image(
-                modifier = Modifier
-                    .fillMaxSize(),
-                painter = painter,
-                contentDescription = contentDescription,
-                contentScale = ContentScale.Crop  // this means you can see the center of picture.
-            )
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Transparent
-                        ),
-                        startY = 30f
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 30.dp)
+                ) {
+                    TextField(
+                        value = textFieldState,
+                        label = {
+                          Text(text = "Enter your name")
+                        },
+                        onValueChange = {
+                            textFieldState = it
+                        },
+                        singleLine = true,
+                        modifier =  Modifier.fillMaxWidth(0.8f).fillMaxHeight(0.08f)
                     )
-                )
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp),
-                contentAlignment = Alignment.BottomCenter
-            ){
-                Text(title, style = TextStyle(color = Color.White,fontSize = 16.sp))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = {
+                        scope.launch {
+                            scaffoldState.snackbarHostState.showSnackbar("Hello $textFieldState")
+                        }
+                    }) {
+                        Text(text = "Please greet me")
+                    }
+                }
             }
         }
     }
